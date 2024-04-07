@@ -6,7 +6,13 @@ import Log from "./components/Log.jsx";
 import GameOver from "./components/GameOver.jsx";
 import { WINNING_COMBINATIONS } from "./Winning_Combinations.js";
 
-const initialGameBoard = [
+
+const PLAYERS={
+  'X': 'Player 1',
+  'O': 'Player 2'
+}
+
+const INTIAL_GAME_BOARD = [
   [null, null, null],
   [null, null, null],
   [null, null, null],
@@ -19,23 +25,19 @@ function deriveActivePlayer(gameTurns) {
   }
   return currentPlayer;
 }
-function App() {
-  const [players,setPlayers] = useState({
-    'X': 'Player 1',
-    'O': 'Player 2'
-  })
-  // const [activePlayer, setActivePlayer]= useState('X');
-  const [gameTurns, setGameTurns] = useState([]);
-  // const [hasWinner, setWinner]=useState(false);
-  const activePlayer = deriveActivePlayer(gameTurns);
-  let gameBoard= [...initialGameBoard.map(array=>[...array])];
+
+function deriveGameBoard(gameTurns){
+  let gameBoard= [...INTIAL_GAME_BOARD.map(array=>[...array])];
   for(const turn of gameTurns){
     const {square, player}=turn;
     const {row,col}=square;
 
     gameBoard[row][col]=player;
   }
+  return gameBoard;
+}
 
+function deriveWINNER(gameBoard, players){
   let winner=null;
 
   for(const combination of WINNING_COMBINATIONS){
@@ -47,7 +49,23 @@ function App() {
       winner=players[firstSquareSymbol];
     }
   }
-const hasDraw= gameTurns.length==9 && !winner;
+  return winner;
+}
+
+
+function App() {
+  const [players,setPlayers] = useState(PLAYERS)
+  const [gameTurns, setGameTurns] = useState([]);
+  // const [activePlayer, setActivePlayer]= useState('X');
+  // const [hasWinner, setWinner]=useState(false);
+
+
+  const activePlayer = deriveActivePlayer(gameTurns);
+  const gameBoard = deriveGameBoard(gameTurns);
+  const winner= deriveWINNER(gameBoard, players);
+
+
+  const hasDraw= gameTurns.length==9 && !winner;
 
 
   function handleSelectSquareforPlayer(rowIndex, colIndex) {
@@ -80,13 +98,13 @@ const hasDraw= gameTurns.length==9 && !winner;
       <div id="game-container">
         <ol id="players" className="highlight-player">
           <Player
-            initialName="Player 1"
+            initialName={PLAYERS.X}
             symbol="X"
             isActive={activePlayer === "X"}
             onNameChange={handlePlayerNameChange}
           />
           <Player
-            initialName="Player 2"
+            initialName={PLAYERS.O}
             symbol="O"
             isActive={activePlayer === "O"}
             onNameChange={handlePlayerNameChange}
